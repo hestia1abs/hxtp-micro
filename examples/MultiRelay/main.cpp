@@ -98,13 +98,13 @@ static HXTPConfig config;
 static hxtp::HXTPClient* client = nullptr;
 
 void on_error(HxtpError err, const char* msg, void*) {
-    Serial.printf("[HXTP] Error %d: %s\n", static_cast<int>(err), msg ? msg : "");
+    Serial.printf("Error %d: %s\n", static_cast<int>(err), msg ? msg : "");
 }
 
 void setup() {
     Serial.begin(115200);
     delay(500);
-    Serial.println("\n[HXTP] 4-Relay Node Example v1.0");
+    Serial.println("\n4-Relay Node Example v1.0");
 
     for (uint8_t i = 0; i < 4; ++i) {
         pinMode(RELAY_PINS[i], OUTPUT);
@@ -127,7 +127,7 @@ void setup() {
 
     HxtpError err = client->begin();
     if (err != HxtpError::OK) {
-        Serial.printf("[HXTP] FATAL: %s\n", hxtp_error_str(err));
+        Serial.printf("FATAL: %s\n", hxtp_error_str(err));
         while (true) delay(1000);
     }
 
@@ -136,7 +136,7 @@ void setup() {
     client->registerCapability(3, "toggle",     handle_toggle);
     client->registerCapability(4, "all_off",    handle_all_off);
 
-    Serial.printf("[HXTP] Device: %s (%zu caps)\n",
+    Serial.printf("Device: %s (%zu caps)\n",
                   client->deviceId(), client->core().capabilities().count());
     client->connect();
 }

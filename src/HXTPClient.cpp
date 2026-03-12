@@ -22,6 +22,9 @@ HXTPClient* HXTPClient::s_instance_ = nullptr;
 HXTPClient::HXTPClient(const HXTPConfig& config)
     : config_(config)
     , mqtt_client_(tls_client_)
+#ifdef ESP8266
+    , x509_ca_(nullptr)
+#endif
     , state_(HxtpClientState::IDLE)
     , last_heartbeat_ms_(0)
     , last_reconnect_ms_(0)
@@ -31,9 +34,6 @@ HXTPClient::HXTPClient(const HXTPConfig& config)
     , state_change_ctx_(nullptr)
     , error_cb_(nullptr)
     , error_ctx_(nullptr)
-#ifdef ESP8266
-    , x509_ca_(nullptr)
-#endif
 {
     memset(tx_buf_, 0, sizeof(tx_buf_));
     memset(ack_buf_, 0, sizeof(ack_buf_));

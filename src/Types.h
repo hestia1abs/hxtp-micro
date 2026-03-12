@@ -20,11 +20,11 @@
 /* ── Protocol Constants (FROZEN — do not modify) ────────────────────── */
 
 static constexpr uint8_t  HXTP_MAGIC[2]           = { 0x48, 0x58 };   /* "HX" */
-static constexpr uint8_t  HXTP_FRAMER_VERSION      = 2;
-static constexpr uint8_t  HXTP_PROTOCOL_MAJOR      = 2;
-static constexpr uint8_t  HXTP_PROTOCOL_MINOR      = 2;
+static constexpr uint8_t  HXTP_FRAMER_VERSION      = 3;
+static constexpr uint8_t  HXTP_PROTOCOL_MAJOR      = 0;
+static constexpr uint8_t  HXTP_PROTOCOL_MINOR      = 1;
 
-static constexpr char     HXTP_VERSION_STRING[]    = "HxTP/2.2";
+static constexpr char     HXTP_VERSION_STRING[]    = "HxTP/3.0";
 static constexpr char     HXTP_CANONICAL_SEP       = '|';
 
 static constexpr uint8_t  HXTP_HEADER_SIZE         = 8;
