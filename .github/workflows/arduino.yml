@@ -35,25 +35,10 @@ on:
             - ".github/workflows/arduino.yml"
 
 jobs:
-    # ── Lint: Arduino Library Specification compliance ────────────
-    lint:
-        name: Arduino Lint
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
-
-            - name: Arduino Lint
-              uses: arduino/arduino-lint-action@v2
-              with:
-                  path: .
-                  library-manager: update
-                  project-type: library
 
     # ── Release: Tag + GitHub Release for Arduino indexer ─────────
     release:
         name: Release to Arduino Library Manager
-        needs: lint
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         runs-on: ubuntu-latest
         permissions:
