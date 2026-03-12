@@ -113,68 +113,50 @@ bool build_canonical_string(
 {
     if (!hdr || !out || out_cap == 0) return false;
 
-    /* FROZEN FORMAT: version|message_type|device_id|tenant_id|timestamp|message_id|nonce
+    /* 
+     * MCSS v3.0 FROZEN FORMAT (10 fields):
+     * version|did|cid|mid|rid|seq|ts|nonce|mtype|phash
      *
-     * Matches server Canonical.ts exactly:
-     *   String(Msg.version), String(Msg.message_type), String(Msg.device_id),
-     *   String(Msg.tenant_id), String(Msg.timestamp), String(Msg.message_id),
-     *   String(Msg.nonce)
+     * Matches Helix Cloud Canonical.ts and Helix Control App.
      */
 
-    /* Timestamp → string (decimal).  Server uses String(timestamp) which
-     * produces the decimal representation of the numeric value. */
     char ts_buf[24];
-    int ts_len = snprintf(ts_buf, sizeof(ts_buf), "%lld",
-                          static_cast<long long>(hdr->timestamp));
+    int ts_len = snprintf(ts_buf, sizeof(ts_buf), "%lld", static_cast<long long>(hdr->timestamp));
     if (ts_len < 0) ts_len = 0;
 
-    /* Calculate required length */
-    size_t required =
-        hdr->version.len
-        + 1  /* | */
-        + hdr->message_type.len
-        + 1
-        + hdr->device_id.len
-        + 1
-        + hdr->tenant_id.len
-        + 1
-        + static_cast<size_t>(ts_len)
-        + 1
-        + hdr->message_id.len
-        + 1
-        + hdr->nonce.len
-        + 1; /* null terminator */
-
-    if (required > out_cap) {
-        *out_len = 0;
-        return false;
-    }
+    char seq_buf[24];
+    int seq_len = snprintf(seq_buf, sizeof(seq_buf), "%lld", static_cast<long long>(hdr->sequence_number));
+    if (seq_len < 0) seq_len = 0;
 
     /* Build the canonical string with pipe separators */
     char* p = out;
+    size_t current_len = 0;
 
-    memcpy(p, hdr->version.c_str(), hdr->version.len);     p += hdr->version.len;
-    *p++ = CanonicalSep;
+    auto append = [&](const char* s, size_t len, bool last = false) -> bool {
+        if (current_len + len + (last ? 0 : 1) >= out_cap) return false;
+        memcpy(p, s, len);
+        p += len;
+        current_len += len;
+        if (!last) {
+            *p++ = CanonicalSep;
+            current_len++;
+        }
+        return true;
+    };
 
-    memcpy(p, hdr->message_type.c_str(), hdr->message_type.len); p += hdr->message_type.len;
-    *p++ = CanonicalSep;
-
-    memcpy(p, hdr->device_id.c_str(), hdr->device_id.len); p += hdr->device_id.len;
-    *p++ = CanonicalSep;
-
-    memcpy(p, hdr->tenant_id.c_str(), hdr->tenant_id.len); p += hdr->tenant_id.len;
-    *p++ = CanonicalSep;
-
-    memcpy(p, ts_buf, static_cast<size_t>(ts_len));         p += ts_len;
-    *p++ = CanonicalSep;
-
-    memcpy(p, hdr->message_id.c_str(), hdr->message_id.len); p += hdr->message_id.len;
-    *p++ = CanonicalSep;
-
-    memcpy(p, hdr->nonce.c_str(), hdr->nonce.len);         p += hdr->nonce.len;
+    if (!append(hdr->version.c_str(), hdr->version.len)) return false;
+    if (!append(hdr->device_id.c_str(), hdr->device_id.len)) return false;
+    if (!append(hdr->client_id.c_str(), hdr->client_id.len)) return false;
+    if (!append(hdr->message_id.c_str(), hdr->message_id.len)) return false;
+    if (!append(hdr->request_id.c_str(), hdr->request_id.len)) return false;
+    if (!append(seq_buf, static_cast<size_t>(seq_len))) return false;
+    if (!append(ts_buf, static_cast<size_t>(ts_len))) return false;
+    if (!append(hdr->nonce.c_str(), hdr->nonce.len)) return false;
+    if (!append(hdr->message_type.c_str(), hdr->message_type.len)) return false;
+    if (!append(hdr->payload_hash.c_str(), hdr->payload_hash.len, true)) return false;
 
     *p = '\0';
-    *out_len = static_cast<size_t>(p - out);
+    *out_len = current_len;
     return true;
 }
 

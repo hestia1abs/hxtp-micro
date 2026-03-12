@@ -442,6 +442,26 @@ Error Core::parse_json_header(InboundFrame* frame) {
         frame->header.sequence_number = -1;
     }
 
+    /* client_id */
+    if (json_get_string(json, jlen, "client_id", buf, sizeof(buf), &blen)) {
+        frame->header.client_id.set(buf, blen);
+    }
+
+    /* request_id */
+    if (json_get_string(json, jlen, "request_id", buf, sizeof(buf), &blen)) {
+        frame->header.request_id.set(buf, blen);
+    }
+
+    /* sequence_number */
+    int64_t seq = -1;
+    if (json_get_int64(json, jlen, "sequence_number", &seq)) {
+        frame->header.sequence_number = seq;
+    } else if (json_get_int64(json, jlen, "sequence", &seq)) {
+        frame->header.sequence_number = seq;
+    } else {
+        frame->header.sequence_number = -1;
+    }
+
     /* payload_hash */
     if (json_get_string(json, jlen, "payload_hash", buf, sizeof(buf), &blen)) {
         frame->header.payload_hash.set(buf, blen);
@@ -629,12 +649,15 @@ Error Core::build_signed_json(
     /* Build canonical string for signature */
     MessageHeader hdr;
     hdr.version.set(VersionString);
-    hdr.message_type.set(message_type);
     hdr.device_id.set(device_id_);
-    hdr.tenant_id.set(tenant_id_);
-    hdr.timestamp      = ts;
+    hdr.client_id.set(client_id_);
     hdr.message_id.set(msg_id);
+    hdr.request_id.set(msg_id); // Default RID=MID for outbound
+    hdr.timestamp      = ts;
+    hdr.sequence_number = seq;
     hdr.nonce.set(nonce, nonce_len);
+    hdr.message_type.set(message_type);
+    hdr.payload_hash.set(payload_hash);
 
     char canonical[512];
     size_t canonical_len = 0;
@@ -660,6 +683,7 @@ Error Core::build_signed_json(
         "\"version\":\"%s\","
         "\"message_type\":\"%s\","
         "\"message_id\":\"%s\","
+        "\"request_id\":\"%s\","
         "\"device_id\":\"%s\","
         "\"tenant_id\":\"%s\","
         "\"client_id\":\"%s\","
@@ -670,6 +694,7 @@ Error Core::build_signed_json(
         "\"signature\":\"%s\"",
         VersionString,
         message_type,
+        msg_id,
         msg_id,
         device_id_,
         tenant_id_,
@@ -835,15 +860,13 @@ Error Core::build_ack(
     int blen;
     if (success) {
         blen = snprintf(body, sizeof(body),
-            "{\"request_id\":\"%s\",\"status\":\"%s\"}",
-            request_id ? request_id : "",
-            AckStatus::EXECUTED
+            "{\"ref_message_id\":\"%s\",\"ack_status\":\"executed\"}",
+            request_id ? request_id : ""
         );
     } else {
         blen = snprintf(body, sizeof(body),
-            "{\"request_id\":\"%s\",\"status\":\"%s\",\"error\":\"%s\"}",
+            "{\"ref_message_id\":\"%s\",\"ack_status\":\"failed\",\"error\":\"%s\"}",
             request_id ? request_id : "",
-            AckStatus::FAILED,
             error_msg ? error_msg : "UNKNOWN_ERROR"
         );
     }
