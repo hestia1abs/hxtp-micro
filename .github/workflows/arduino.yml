@@ -19,7 +19,7 @@
 #  Copyright (c) 2026 Hestia Labs
 # ═══════════════════════════════════════════════════════════════════
 
-name: Arduino Library Release
+name: Library Release
 
 on:
     push:
