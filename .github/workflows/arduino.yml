@@ -39,6 +39,8 @@ jobs:
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
+              with:
+                  path: hxtp-micro
 
             - name: Arduino Lint
               uses: arduino/arduino-lint-action@v2

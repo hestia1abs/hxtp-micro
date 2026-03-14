@@ -16,110 +16,118 @@
 name: hxtp-micro CI
 
 on:
-    push:
-        branches: [main, develop]
-        paths:
-            - "lib/HXTP/**"
-            - "src/**"
-            - "platformio.ini"
-            - ".github/workflows/hxtp-micro.yml"
-    pull_request:
-        branches: [main]
-        paths:
-            - "lib/HXTP/**"
-            - "src/**"
-            - "platformio.ini"
-            - ".github/workflows/hxtp-micro.yml"
+  push:
+    branches: [main, develop]
+    paths:
+      - "src/**"
+      - "platformio.ini"
+      - "library.properties"
+      - ".github/workflows/hxtp-micro.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "platformio.ini"
+      - "library.properties"
+      - ".github/workflows/hxtp-micro.yml"
 
 jobs:
-    # ── Build: ESP32-S3 (primary target) ─────────────────────────────
-    build-esp32s3:
-        name: Build (ESP32-S3)
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
+  # ── Build: ESP32-S3 (primary target) ─────────────────────────────
+  build-esp32s3:
+    name: Build (ESP32-S3)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: hxtp-micro
 
-            - name: Set up Python
-              uses: actions/setup-python@v5
-              with:
-                  python-version: "3.12"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
-            - name: Cache PlatformIO packages
-              uses: actions/cache@v4
-              with:
-                  path: ~/.platformio
-                  key: ${{ runner.os }}-pio-esp32s3-${{ hashFiles('platformio.ini') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pio-esp32s3-
+      - name: Cache PlatformIO packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: ${{ runner.os }}-pio-esp32s3-${{ hashFiles('hxtp-micro/platformio.ini') }}
+          restore-keys: |
+            ${{ runner.os }}-pio-esp32s3-
 
-            - name: Install PlatformIO Core
-              run: pip install --quiet platformio
+      - name: Install PlatformIO Core
+        run: pip install --quiet platformio
 
-            - name: Compile for ESP32-S3
-              run: pio run -e esp32s3
+      - name: Compile for ESP32-S3
+        run: cd hxtp-micro && pio run -e esp32s3
 
-    # ── Build: ESP32-WROOM (tier-2 target) ───────────────────────────
-    build-esp32:
-        name: Build (ESP32-WROOM)
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
+  # ── Build: ESP32-WROOM (tier-2 target) ───────────────────────────
+  build-esp32:
+    name: Build (ESP32-WROOM)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: hxtp-micro
 
-            - name: Set up Python
-              uses: actions/setup-python@v5
-              with:
-                  python-version: "3.12"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
-            - name: Cache PlatformIO packages
-              uses: actions/cache@v4
-              with:
-                  path: ~/.platformio
-                  key: ${{ runner.os }}-pio-esp32-${{ hashFiles('platformio.ini') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pio-esp32-
+      - name: Cache PlatformIO packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: ${{ runner.os }}-pio-esp32-${{ hashFiles('hxtp-micro/platformio.ini') }}
+          restore-keys: |
+            ${{ runner.os }}-pio-esp32-
 
-            - name: Install PlatformIO Core
-              run: pip install --quiet platformio
+      - name: Install PlatformIO Core
+        run: pip install --quiet platformio
 
-            - name: Compile for ESP32-WROOM
-              run: pio run -e esp32
+      - name: Compile for ESP32-WROOM
+        run: cd hxtp-micro && pio run -e esp32
 
-    # ── Static Analysis: Arduino Lint ────────────────────────────────
-    arduino-lint:
-        name: Arduino Library Lint
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
+  # ── Static Analysis: Arduino Lint ────────────────────────────────
+  arduino-lint:
+    name: Arduino Library Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: hxtp-micro
 
-            - name: Arduino Lint
-              uses: arduino/arduino-lint-action@v2
-              with:
-                  path: lib/HXTP
-                  library-manager: update
-                  compliance: strict
-                  project-type: library
+      - name: Arduino Lint
+        uses: arduino/arduino-lint-action@v2
+        with:
+          path: hxtp-micro
+          library-manager: update
+          compliance: strict
+          project-type: library
 
-    # ── Static Analysis: cppcheck ────────────────────────────────────
-    cppcheck:
-        name: cppcheck Static Analysis
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
+  # ── Static Analysis: cppcheck ────────────────────────────────────
+  cppcheck:
+    name: cppcheck Static Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: hxtp-micro
 
-            - name: Install cppcheck
-              run: sudo apt-get install -y --no-install-recommends cppcheck
+      - name: Install cppcheck
+        run: sudo apt-get install -y --no-install-recommends cppcheck
 
-            - name: Run cppcheck on HXTP library
-              run: |
-                  cppcheck \
-                    --enable=warning,style,performance,portability \
-                    --suppress=missingIncludeSystem \
-                    --error-exitcode=1 \
-                    --inline-suppr \
-                    --std=c++17 \
-                    -I lib/HXTP/src \
-                    lib/HXTP/src/
+      - name: Run cppcheck on HXTP library
+        run: |
+          cppcheck \
+            --enable=warning,style,performance,portability \
+            --suppress=missingIncludeSystem \
+            --error-exitcode=1 \
+            --inline-suppr \
+            --std=c++17 \
+            -I hxtp-micro/src \
+            hxtp-micro/src/
