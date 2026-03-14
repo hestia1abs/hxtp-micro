@@ -21,6 +21,9 @@
 
 name: Arduino Library Release
 
+env:
+    FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
     push:
         tags: ["v*"]
@@ -76,7 +79,9 @@ jobs:
                   echo "name=$NAME" >> "$GITHUB_OUTPUT"
                   echo "Detected: $NAME v$VERSION from tag"
 
-                  zip -r ${{ steps.version.outputs.name }}-${{ steps.version.outputs.version }}.zip hxtp-micro -x "hxtp-micro/.git/*" "hxtp-micro/.github/*" "hxtp-micro/.vscode/*"
+                  cd hxtp-micro
+                  zip -r ../${{ steps.version.outputs.name }}-${{ steps.version.outputs.version }}.zip . -x ".git/*" ".github/*" ".vscode/*"
+                  cd ..
                   ls -lh ${{ steps.version.outputs.name }}-${{ steps.version.outputs.version }}.zip
 
             - name: Create GitHub Release (triggered by tag push)

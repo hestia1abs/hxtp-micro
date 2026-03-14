@@ -132,7 +132,7 @@ static bool eeprom_read_device_id(char* out, size_t max_len) {
     /* Validate: check that it's not all zeros */
     bool all_zero = true;
     for (size_t i = 0; i < DeviceIdLen; ++i) {
-        if (out[i] != '\0' && out[i] != 0) { all_zero = false; break; }
+        if (out[i] != '\0') { all_zero = false; break; }
     }
     return !all_zero;
 }
@@ -193,6 +193,10 @@ inline StorageAdapter create_eeprom_adapter() {
     adapter.write_sequence  = eeprom_write_sequence;
     adapter.read_device_id  = eeprom_read_device_id;
     adapter.write_device_id = eeprom_write_device_id;
+    adapter.read_param      = nullptr; /* Not supported on basic EEPROM */
+    adapter.write_param     = nullptr;
+    adapter.read_ca_cert    = nullptr;
+    adapter.write_ca_cert   = nullptr;
     return adapter;
 }
 

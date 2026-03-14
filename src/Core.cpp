@@ -302,6 +302,7 @@ Core::Core()
     , platform_(nullptr)
     , secret_loaded_(false)
     , outbound_sequence_(0)
+    , val_ctx_({})
 {
     memset(device_id_, 0, sizeof(device_id_));
     memset(tenant_id_, 0, sizeof(tenant_id_));

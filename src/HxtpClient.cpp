@@ -9,7 +9,7 @@
  * SDK-License-Identifier: MIT
  */
 
-#include "Client.h"
+#include "HxtpClient.h"
 #include <cstring>
 
 namespace hxtp {
@@ -34,9 +34,11 @@ Client::Client(const Config& config)
     , state_enter_ms_(0)
     , state_change_cb_(nullptr)
     , state_change_ctx_(nullptr)
-    , error_cb_(nullptr)
-    , error_ctx_(nullptr)
-    , mqtt_port_(8883)
+    ,error_cb_(nullptr)
+    ,error_ctx_(nullptr)
+    ,storage_adapter_({})
+    ,platform_crypto_({})
+    ,mqtt_port_(8883)
 {
     memset(tx_buf_, 0, sizeof(tx_buf_));
     memset(ack_buf_, 0, sizeof(ack_buf_));
@@ -443,7 +445,7 @@ void Client::mqtt_callback_static(char* topic, uint8_t* payload, unsigned int le
     }
 }
 
-void Client::mqtt_on_message(char* topic, uint8_t* payload, unsigned int length) {
+void Client::mqtt_on_message(const char* topic, const uint8_t* payload, unsigned int length) {
     if (!payload || length == 0) return;
 
     /* Process through core engine */

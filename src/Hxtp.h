@@ -21,6 +21,6 @@
 #include "Errors.h"
 
 /* ── Client API ──────────────────────────────────────────────────────── */
-#include "Client.h"
+#include "HxtpClient.h"
 
 #endif /* Hxtp_h */

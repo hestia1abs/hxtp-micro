@@ -252,6 +252,8 @@ using CapabilityHandler = CapabilityResult (*)(
     void*       user_ctx
 );
 
+namespace hxtp {
+
 /* ── Capability Registration Entry ──────────────────────────────────── */
 
 struct CapabilityEntry {
@@ -301,6 +303,8 @@ struct Config {
         max_reconnect_delay_ms(60000)
     {}
 };
+
+} /* namespace hxtp */
 
 /* ── Platform Abstraction — Storage Interface ───────────────────────── */
 

@@ -29,7 +29,7 @@ namespace hxtp {
 
 class Provisioning {
 public:
-    Provisioning(StorageAdapter* storage);
+    explicit Provisioning(StorageAdapter* storage);
 
     /**
      * Start the provisioning SoftAP and WebServer.

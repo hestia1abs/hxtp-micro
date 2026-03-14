@@ -164,7 +164,7 @@ private:
 
     /* ── MQTT Message Handler ──────────────────────────── */
     static void mqtt_callback_static(char* topic, uint8_t* payload, unsigned int length);
-    void mqtt_on_message(char* topic, uint8_t* payload, unsigned int length);
+    void mqtt_on_message(const char* topic, const uint8_t* payload, unsigned int length);
 
     /* ── Heartbeat ────────────────────────────────────── */
     void send_heartbeat();
