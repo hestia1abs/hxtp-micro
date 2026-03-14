@@ -1,4 +1,4 @@
-# HXTP Embedded SDK v3.0
+# HXTP Embedded SDK 
 
 > HxTP/3.0 protocol implementation for ESP32 and ESP8266 IoT devices.\
 > PlatformIO-native · Arduino framework · Zero dynamic allocation in hot path.
